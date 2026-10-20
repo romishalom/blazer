@@ -194,20 +194,21 @@ You can also supply your own `&'static [&'static str]`.
 ### Tables
 
 [`Table`](https://docs.rs/blazer/latest/blazer/table/struct.Table.html) renders
-neatly aligned, box-drawn tables with minimal setup.
+customizable, neatly aligned, box-drawn tables with flexible padding and border configurations.
 
 ```rust
-use blazer::table::{Alignment, Table};
+use blazer::table::{Alignment, Borders, Padding, Table};
 
 fn main() {
     let mut table = Table::new(vec!["Package", "Version", "Status"])
+        .with_borders(Borders::SINGLE)
         .with_alignment(Alignment::Left);
 
     table.add_row(vec!["serde", "1.0.188", "✔"]);
     table.add_row(vec!["tokio", "1.32.0", "✔"]);
     table.add_row(vec!["blazer", "0.1.0", "✔"]);
 
-    table.print();
+    println!("{table}");
 }
 ```
 
@@ -223,7 +224,41 @@ fn main() {
 +----------+---------+--------+
 ```
 
-Supports `Alignment::Left`, `Alignment::Center`, and `Alignment::Right`.
+#### Border Presets (`Borders`)
+
+| Constant         | Preview              | Description                              |
+|------------------|----------------------|------------------------------------------|
+| `Borders::SINGLE`| `─ │ ┼`             | Standard single-line box drawing         |
+| `Borders::DOUBLE`| `═ ║ ╬`             | Heavy double-line box drawing            |
+| `Borders::ASCII` | `- \| +`             | Plain ASCII characters for maximum portability |
+| `Borders::DASHED`| `╌ ╎ ┼`             | Dashed Unicode border style              |
+| `Borders::DOTTED`| `┄ ┊ ┼`             | Dotted Unicode border style              |
+| `Borders::EMPTY` | *(None)*             | Completely borderless rendering          |
+
+You can also create fully custom borders or turn off borders with `.borderless()`.
+
+```rust
+// Custom border
+let custom_borders = Borders::empty().horizontal('-').vertical('|');
+
+// Borderless helper
+let table = Table::new(vec!["Key", "Value"]).borderless();
+```
+
+#### Padding Options (`Padding`)
+
+Control left, right, and fill character properties on cells:
+
+```rust
+// Uniform spacing
+let pad = Padding::uniform(2);
+
+// Asymmetric padding
+let pad = Padding::new(1, 3, ' ');
+
+// Custom fill character
+let pad = Padding::uniform_with_fill(1, '.');
+```
 
 ---
 

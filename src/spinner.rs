@@ -6,6 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+pub use crate::symbols::frames;
 
 /// An animated spinner for displaying indeterminate progress in the terminal.
 ///
