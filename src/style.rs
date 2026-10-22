@@ -7,7 +7,8 @@
 use crate::color::Color;
 use std::fmt;
 
-const RESET: &str = "\x1b[0m";
+/// The reset sequence, used to reset all styling.
+pub const RESET: &str = "\x1b[0m";
 
 /// Internal set of boolean text attributes (bold, italic, etc.).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -427,4 +428,185 @@ pub fn strip_ansi(input: &str) -> String {
     }
 
     result
+}
+
+/// Parses a string containing nested markup and returns a vector of [`StyledString`] objects.
+pub fn parse_styled_components(input: &str) -> Vec<StyledString> {
+    use crate::Stylize;
+
+    let mut segments = Vec::new();
+    let mut chars = input.chars().peekable();
+    let mut style_stack: Vec<String> = Vec::new();
+
+    while let Some(c) = chars.next() {
+        if c == '[' {
+            let mut tag = String::new();
+            while let Some(&next_c) = chars.peek() {
+                chars.next();
+                if next_c == ']' {
+                    break;
+                }
+                tag.push(next_c);
+            }
+            if tag == "/" || tag == format!("/{}", style_stack.last().unwrap_or(&" ".to_string()))  {
+                style_stack.pop();
+            } else {
+                style_stack.push(tag);
+            }
+        } else {
+            let mut text = String::new();
+            text.push(c);
+            while let Some(&next_c) = chars.peek() {
+                if next_c == '[' {
+                    break;
+                }
+                text.push(chars.next().unwrap());
+            }
+
+            let mut styled = text.stylize();
+
+            for style_tag in &style_stack {
+                styled = match style_tag.as_str() {
+                    "black" => styled.black(),
+                    "red" => styled.red(),
+                    "green" => styled.green(),
+                    "yellow" => styled.yellow(),
+                    "blue" => styled.blue(),
+                    "magenta" => styled.magenta(),
+                    "cyan" => styled.cyan(),
+                    "white" => styled.white(),
+                    "bright_black" => styled.bright_black(),
+                    "bright_red" => styled.bright_red(),
+                    "bright_green" => styled.bright_green(),
+                    "bright_yellow" => styled.bright_yellow(),
+                    "bright_blue" => styled.bright_blue(),
+                    "bright_magenta" => styled.bright_magenta(),
+                    "bright_cyan" => styled.bright_cyan(),
+                    "bright_white" => styled.bright_white(),
+
+                    "on_black" => styled.on_black(),
+                    "on_red" => styled.on_red(),
+                    "on_green" => styled.on_green(),
+                    "on_yellow" => styled.on_yellow(),
+                    "on_blue" => styled.on_blue(),
+                    "on_magenta" => styled.on_magenta(),
+                    "on_cyan" => styled.on_cyan(),
+                    "on_white" => styled.on_white(),
+                    "on_bright_black" => styled.on_bright_black(),
+                    "on_bright_red" => styled.on_bright_red(),
+                    "on_bright_green" => styled.on_bright_green(),
+                    "on_bright_yellow" => styled.on_bright_yellow(),
+                    "on_bright_blue" => styled.on_bright_blue(),
+                    "on_bright_magenta" => styled.on_bright_magenta(),
+                    "on_bright_cyan" => styled.on_bright_cyan(),
+                    "on_bright_white" => styled.on_bright_white(),
+
+                    "bold" => styled.bold(),
+                    "dim" => styled.dim(),
+                    "italic" => styled.italic(),
+                    "underline" => styled.underline(),
+                    "blink" => styled.blink(),
+                    "reverse" => styled.reverse(),
+                    "hidden" => styled.hidden(),
+                    "strikethrough" => styled.strikethrough(),
+                    _ => styled,
+                };
+            }
+
+            segments.push(styled);
+        }
+    }
+
+    segments
+}
+
+/// Renders a vector of [`StyledString`] objects into a single string.
+pub fn render_styled_components(styled: Vec<StyledString>) -> String {
+    styled.iter().render()
+}
+
+/// Parses a string containing inline markup and returns a rendered string.
+pub fn parse_styled(input: &str) -> String {
+    render_styled_components(parse_styled_components(input))
+}
+
+/// Extension trait for iterators yielding [`StyledString`] references,
+/// allowing them to be concatenated into a single rendered string.
+pub trait Renderable {
+    /// Renders and concatenates all styled strings in the iterator into one.
+    fn render(self) -> String;
+}
+
+impl<'a, I> Renderable for I
+where
+    I: Iterator<Item = &'a StyledString>,
+{
+    fn render(self) -> String {
+        self.map(ToString::to_string).collect()
+    }
+}
+
+/// A macro for styling strings using inline markup tags.
+///
+/// Supports format string interpolation just like `format!`.
+///
+/// # Examples
+///
+/// ```
+/// use blazer::style;
+///
+/// let name = "Alice";
+/// let msg = style!("[red]Hello [underline]in style to [/][/][blue]{}[/]", name);
+/// ```
+#[macro_export]
+macro_rules! style {
+    ($($arg:tt)*) => {
+        $crate::style::parse_styled(&format!($($arg)*))
+    };
+}
+
+/// A macro for styling strings using inline markup tags and printing them to standard output.
+/// Paint prints the styled string and then resets the style without adding a new line.
+///
+/// Supports format string interpolation just like `format!`.
+/// Uses the same inline markup tags as `style!`.
+///
+///
+/// # Examples
+///
+/// ```
+/// use blazer::paint;
+///
+/// let name = "Alice";
+/// let msg = paint!("[red]Hello, [bold]{}[/][/]", name);
+/// ```
+#[macro_export]
+macro_rules! paint {
+    ($($arg:tt)*) => {
+        print!("\x1b[0m{}", $crate::style!($($arg)*))
+    };
+}
+
+/// A macro for styling strings using a shorthand idiomatic syntax and printing them to standard output.
+/// Paintln prints the styled string and then resets the style, adding a new line.
+///
+/// Supports format string interpolation just like `format!`.
+/// Uses the same inline markup tags as `style!`.
+///
+/// # Examples
+///
+/// ```
+/// use blazer::paint;
+///
+/// let name = "Alice";
+/// let msg = paintln!("[red]Hello, [bold]{}[/][/]", name);
+/// ```
+#[macro_export]
+macro_rules! paintln {
+    ($($arg:tt)*) => {
+        {
+            $crate::paint!($($arg)*);
+            println!("")
+        }
+    };
 }

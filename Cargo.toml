@@ -1,6 +1,6 @@
 [package]
 name = "blazer"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Romi Shalom <romishalom01@gmail.com>"]
 description = "A blazing fast, feature-rich library for styling and enhancing CLI output in Rust"

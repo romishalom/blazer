@@ -1,4 +1,4 @@
-use blazer::Stylize;
+use blazer::{paintln, Stylize};
 
 fn main() {
     println!("{}", "Standard colors:".bold());
@@ -17,4 +17,7 @@ fn main() {
     println!("\n{}", "Advanced colors:".bold());
     println!("{}", "256-color".fixed(202));
     println!("{}", "RGB truecolor".rgb(64, 224, 208).bold());
+
+    // Using the paintln macro
+    paintln!("[red]Hello [underline]{}[/] in red.[/] [blue]Hello [underline]{}[/] in blue[/].", "John", "Jane");
 }
