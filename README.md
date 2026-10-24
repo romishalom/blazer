@@ -201,7 +201,7 @@ use blazer::table::{Alignment, Borders, Padding, Table};
 
 fn main() {
     let mut table = Table::new(vec!["Package", "Version", "Status"])
-        .with_borders(Borders::SINGLE)
+        .with_borders(Borders::ASCII)
         .with_alignment(Alignment::Left);
 
     table.add_row(vec!["serde", "1.0.188", "✔"]);
