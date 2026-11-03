@@ -17,6 +17,7 @@ use std::io::{self, Write};
 /// }
 /// bar.finish();
 /// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProgressBar {
     total: u64,
     position: u64,

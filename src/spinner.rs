@@ -24,6 +24,7 @@ pub use crate::symbols::frames;
 /// std::thread::sleep(Duration::from_secs(2));
 /// spinner.stop("Done!");
 /// ```
+#[derive(Debug)]
 pub struct Spinner {
     message: String,
     frames: &'static [&'static str],

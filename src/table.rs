@@ -50,6 +50,7 @@ impl Default for Padding {
 }
 
 /// Border configuration for table cells.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Borders {
     horizontal: Option<char>,
     vertical: Option<char>,
@@ -130,6 +131,7 @@ pub enum Alignment {
 /// table.add_row(vec!["Bob", "25", "LA"]);
 /// println!("{}", table.render());
 /// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Table {
     headers: Vec<String>,
     rows: Vec<Vec<String>>,
