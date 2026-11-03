@@ -596,7 +596,7 @@ macro_rules! paint {
 /// # Examples
 ///
 /// ```
-/// use blazer::paint;
+/// use blazer::paintln;
 ///
 /// let name = "Alice";
 /// let msg = paintln!("[red]Hello, [bold]{}[/][/]", name);
@@ -606,7 +606,7 @@ macro_rules! paintln {
     ($($arg:tt)*) => {
         {
             $crate::paint!($($arg)*);
-            println!("")
+            std::println!("")
         }
     };
 }
